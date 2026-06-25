@@ -165,21 +165,6 @@
         position: relative;
       }
 
-      .stage::before {
-        content: "";
-        position: absolute;
-        left: 50%;
-        bottom: 8%;
-        width: min(860px, 96vw);
-        height: 260px;
-        transform: translateX(-50%);
-        background:
-          radial-gradient(ellipse at 50% 56%, rgba(255, 190, 58, 0.38), transparent 52%),
-          linear-gradient(112deg, transparent 0 48%, rgba(255, 79, 27, 0.34) 48.4% 48.8%, transparent 49.2%),
-          linear-gradient(68deg, transparent 0 56%, rgba(255, 196, 82, 0.22) 56.3% 56.7%, transparent 57%);
-        pointer-events: none;
-      }
-
       .box-scene {
         width: min(780px, 94vw);
         aspect-ratio: 1 / 0.9;
@@ -327,10 +312,6 @@
 
       .app.has-result .cards-view {
         display: block;
-      }
-
-      .app.has-result .stage::before {
-        display: none;
       }
 
       .cards-grid {
