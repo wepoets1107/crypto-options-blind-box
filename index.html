@@ -1,0 +1,1097 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>期权盲盒</title>
+    <meta name="description" content="期权盲盒，不装大师，只卖心跳。" />
+    <style>
+      :root {
+        --bg: #050403;
+        --ink: #fff4c8;
+        --muted: #b78d4a;
+        --gold: #f3c15b;
+        --gold-2: #fff0a6;
+        --red: #e13f2f;
+        --red-2: #ff7a42;
+        --cyan: #20c8ff;
+        --line: rgba(245, 194, 92, 0.54);
+        --dark-card: rgba(9, 8, 7, 0.88);
+        font-family:
+          "Microsoft YaHei",
+          "PingFang SC",
+          "Noto Sans CJK SC",
+          Arial,
+          sans-serif;
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        min-height: 100%;
+        background: var(--bg);
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background:
+          linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.82) 78%),
+          url("./assets/page-bg.png") center top / cover fixed,
+          radial-gradient(circle at 50% 36%, rgba(239, 91, 35, 0.18), transparent 30%),
+          radial-gradient(circle at 50% 78%, rgba(255, 179, 56, 0.18), transparent 26%),
+          linear-gradient(180deg, #000 0%, #080605 46%, #030201 100%);
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background:
+          linear-gradient(115deg, transparent 0 49%, rgba(255, 84, 31, 0.2) 49.2% 49.5%, transparent 49.7%),
+          linear-gradient(63deg, transparent 0 58%, rgba(255, 170, 37, 0.11) 58.2% 58.6%, transparent 58.8%),
+          radial-gradient(circle at 12% 18%, rgba(255, 71, 38, 0.32) 0 1px, transparent 2px),
+          radial-gradient(circle at 86% 12%, rgba(255, 178, 56, 0.42) 0 2px, transparent 3px),
+          radial-gradient(circle at 78% 56%, rgba(255, 105, 39, 0.26) 0 2px, transparent 3px);
+        opacity: 0.76;
+      }
+
+      button,
+      a {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .app {
+        position: relative;
+        z-index: 1;
+        width: min(100%, 1180px);
+        margin: 0 auto;
+        padding: 42px 18px 32px;
+      }
+
+      .hero-title {
+        position: relative;
+        width: max-content;
+        max-width: 100%;
+        margin: 0 auto;
+        text-align: center;
+        color: #ffe18a;
+        font-family: "Microsoft YaHei UI", "Microsoft YaHei", "SimHei", sans-serif;
+        font-size: clamp(72px, 15vw, 168px);
+        line-height: 0.88;
+        font-weight: 1000;
+        letter-spacing: 0;
+        -webkit-text-stroke: 1px #8b4a10;
+        text-shadow:
+          0 2px 0 #a85a13,
+          0 7px 0 #4f2106,
+          0 0 22px rgba(255, 217, 111, 0.82),
+          0 0 56px rgba(255, 97, 30, 0.28);
+        filter:
+          drop-shadow(0 0 18px rgba(255, 211, 91, 0.72))
+          drop-shadow(0 0 44px rgba(255, 101, 28, 0.26));
+      }
+
+      .hero-title::before,
+      .hero-title::after {
+        content: attr(data-text);
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      .hero-title::before {
+        z-index: -1;
+        color: #522006;
+        -webkit-text-stroke: 3px #2d1002;
+        transform: translate(8px, 10px);
+        text-shadow:
+          0 2px 0 #180701,
+          0 8px 0 #351505,
+          0 18px 22px rgba(0, 0, 0, 0.74);
+      }
+
+      .hero-title::after {
+        color: transparent;
+        background:
+          linear-gradient(178deg, rgba(255, 255, 255, 0.55) 0 10%, transparent 11% 32%, rgba(255, 236, 155, 0.24) 33% 42%, transparent 43% 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        mix-blend-mode: screen;
+        opacity: 0.72;
+      }
+
+      .tagline {
+        margin: 22px auto 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        color: #ffd46e;
+        font-size: clamp(24px, 6vw, 48px);
+        font-weight: 1000;
+        text-align: center;
+        text-shadow: 0 0 18px rgba(255, 93, 40, 0.72);
+      }
+
+      .tagline::before,
+      .tagline::after {
+        content: "";
+        width: min(110px, 18vw);
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--red-2), var(--gold));
+        box-shadow: 0 0 12px rgba(255, 87, 31, 0.72);
+      }
+
+      .tagline::after {
+        transform: scaleX(-1);
+      }
+
+      .stage {
+        min-height: 660px;
+        display: grid;
+        place-items: center;
+        padding: clamp(26px, 4.4vw, 48px) 0 12px;
+        position: relative;
+      }
+
+      .stage::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: 8%;
+        width: min(860px, 96vw);
+        height: 260px;
+        transform: translateX(-50%);
+        background:
+          radial-gradient(ellipse at 50% 56%, rgba(255, 190, 58, 0.38), transparent 52%),
+          linear-gradient(112deg, transparent 0 48%, rgba(255, 79, 27, 0.34) 48.4% 48.8%, transparent 49.2%),
+          linear-gradient(68deg, transparent 0 56%, rgba(255, 196, 82, 0.22) 56.3% 56.7%, transparent 57%);
+        pointer-events: none;
+      }
+
+      .box-scene {
+        width: min(780px, 94vw);
+        aspect-ratio: 1 / 0.9;
+        position: relative;
+        display: grid;
+        place-items: center;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        isolation: isolate;
+      }
+
+      .box-scene::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 52%;
+        width: 78%;
+        height: 54%;
+        transform: translate(-50%, -30%);
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 206, 83, 0.42), rgba(255, 87, 28, 0.2) 46%, transparent 72%);
+        filter: blur(34px);
+        opacity: 0.92;
+        z-index: -1;
+      }
+
+      .hero-box-img {
+        width: 100%;
+        height: auto;
+        display: block;
+        transform: translateY(0) scale(1.02);
+        filter:
+          drop-shadow(0 38px 44px rgba(0, 0, 0, 0.9))
+          drop-shadow(0 0 46px rgba(255, 181, 54, 0.42));
+        transition: transform 0.28s ease, filter 0.28s ease;
+        user-select: none;
+        pointer-events: none;
+      }
+
+      .box-scene:hover .hero-box-img,
+      .box-scene:focus-visible .hero-box-img {
+        transform: translateY(-8px) scale(1.055);
+        filter:
+          drop-shadow(0 34px 52px rgba(0, 0, 0, 0.9))
+          drop-shadow(0 0 60px rgba(255, 190, 64, 0.56));
+      }
+
+      .card-back {
+        position: absolute;
+        width: 24%;
+        aspect-ratio: 3 / 4.35;
+        left: 50%;
+        top: 46%;
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3) rotate(0deg);
+        object-fit: contain;
+        filter:
+          drop-shadow(0 18px 28px rgba(0, 0, 0, 0.75))
+          drop-shadow(0 0 26px rgba(255, 181, 54, 0.52));
+        pointer-events: none;
+      }
+
+      .box-scene.opening .hero-box-img {
+        animation: boxImageOpen 0.95s ease both;
+      }
+
+      .box-scene.opening::after {
+        content: "";
+        position: absolute;
+        width: 42%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 246, 170, 0.98), rgba(255, 128, 37, 0.44) 48%, transparent 72%);
+        filter: blur(12px);
+        animation: burst 0.95s ease both;
+        z-index: 2;
+      }
+
+      .box-scene.opening .card-back.one {
+        animation: flyCardLeft 0.95s ease both;
+      }
+
+      .box-scene.opening .card-back.two {
+        animation: flyCardRight 0.95s ease both;
+      }
+
+      @keyframes boxImageOpen {
+        0% { transform: translateY(0) scale(1.02) rotate(0deg); }
+        18% { transform: translateY(-6px) scale(1.05) rotate(-1.5deg); }
+        45% { transform: translateY(-12px) scale(1.08) rotate(2deg); filter: drop-shadow(0 0 70px rgba(255, 210, 91, 0.6)); }
+        100% { transform: translateY(0) scale(1.02) rotate(0deg); }
+      }
+
+      @keyframes burst {
+        0% { transform: scale(0.25); opacity: 0; }
+        38% { opacity: 1; }
+        100% { transform: scale(2.1); opacity: 0; }
+      }
+
+      @keyframes flyCardLeft {
+        0% { opacity: 0; transform: translate(-50%, -20%) scale(0.24) rotate(0deg); }
+        35% { opacity: 1; }
+        100% { opacity: 0; transform: translate(-138%, -118%) scale(0.9) rotate(-15deg); }
+      }
+
+      @keyframes flyCardRight {
+        0% { opacity: 0; transform: translate(-50%, -20%) scale(0.24) rotate(0deg); }
+        35% { opacity: 1; }
+        100% { opacity: 0; transform: translate(42%, -122%) scale(0.9) rotate(14deg); }
+      }
+
+      .spark {
+        position: absolute;
+        width: 4px;
+        height: 18px;
+        border-radius: 999px;
+        background: linear-gradient(var(--gold-2), var(--red-2));
+        box-shadow: 0 0 16px rgba(255, 143, 50, 0.8);
+        animation: spark 2.6s linear infinite;
+        z-index: 2;
+      }
+
+      .spark:nth-of-type(1) { left: 8%; top: 12%; transform: rotate(32deg); }
+      .spark:nth-of-type(2) { right: 13%; top: 22%; transform: rotate(-28deg); animation-delay: 0.4s; }
+      .spark:nth-of-type(3) { left: 18%; bottom: 18%; transform: rotate(-44deg); animation-delay: 1s; }
+      .spark:nth-of-type(4) { right: 8%; bottom: 30%; transform: rotate(18deg); animation-delay: 1.5s; }
+
+      @keyframes spark {
+        0%, 100% { opacity: 0.18; }
+        40% { opacity: 1; }
+        70% { opacity: 0.44; transform: translateY(-18px) rotate(18deg); }
+      }
+
+      .cards-view {
+        display: none;
+        width: min(980px, 100%);
+        margin: 0 auto;
+        padding-top: clamp(28px, 5vw, 54px);
+      }
+
+      .app.has-result .box-scene {
+        display: none;
+      }
+
+      .app.has-result .cards-view {
+        display: block;
+      }
+
+      .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(280px, 1fr));
+        gap: clamp(22px, 4vw, 42px);
+        align-items: start;
+      }
+
+      .draw-card {
+        min-height: 560px;
+        aspect-ratio: 3 / 4.35;
+        border-radius: 18px;
+        position: relative;
+        overflow: hidden;
+        background: var(--dark-card);
+        border: 2px solid var(--accent);
+        box-shadow:
+          inset 0 0 0 2px rgba(0, 0, 0, 0.64),
+          0 0 34px var(--glow),
+          0 24px 52px rgba(0, 0, 0, 0.62);
+      }
+
+      .draw-card::before {
+        content: "";
+        position: absolute;
+        inset: 14px;
+        border: 1px solid color-mix(in srgb, var(--accent), transparent 24%);
+        border-radius: 12px;
+        pointer-events: none;
+      }
+
+      .draw-card.coin-card {
+        --accent: #f4c65d;
+        --glow: rgba(250, 190, 70, 0.34);
+        display: grid;
+        place-items: center;
+        padding: 40px;
+        text-align: center;
+        background:
+          radial-gradient(circle at 50% 38%, rgba(255, 214, 104, 0.22), transparent 42%),
+          linear-gradient(150deg, rgba(255, 201, 91, 0.12), transparent 46%),
+          #0b0906;
+      }
+
+      .coin-logo {
+        width: min(210px, 58%);
+        aspect-ratio: 1;
+        display: grid;
+        place-items: center;
+        margin: 0 auto 34px;
+      }
+
+      .coin-logo svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+        filter: drop-shadow(0 0 18px var(--glow));
+      }
+
+      .coin-logo img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: contain;
+        filter: drop-shadow(0 0 18px var(--glow));
+      }
+
+      .coin-symbol {
+        margin: 0;
+        color: var(--accent);
+        font-size: clamp(62px, 10vw, 108px);
+        line-height: 1;
+        font-weight: 1000;
+        text-shadow: 0 0 28px var(--glow);
+      }
+
+      .card-label {
+        position: absolute;
+        top: 28px;
+        left: 28px;
+        color: color-mix(in srgb, var(--accent), #ffffff 20%);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+      }
+
+      .draw-card.task-card {
+        --accent: #ff654f;
+        --glow: rgba(255, 79, 49, 0.32);
+        padding: 34px;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 22px;
+        background:
+          radial-gradient(circle at 50% 20%, rgba(255, 91, 50, 0.22), transparent 34%),
+          linear-gradient(155deg, rgba(255, 64, 42, 0.2), transparent 48%),
+          #100706;
+      }
+
+      .task-title {
+        margin: 34px 0 0;
+        color: #ffd2bd;
+        font-size: clamp(36px, 5.4vw, 56px);
+        line-height: 1.05;
+        font-weight: 1000;
+        text-shadow: 0 0 24px rgba(255, 94, 47, 0.58);
+      }
+
+      .task-rows {
+        align-self: end;
+        display: grid;
+        gap: 12px;
+      }
+
+      .task-row {
+        padding: 14px 16px;
+        border: 1px solid rgba(255, 132, 82, 0.42);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.045);
+      }
+
+      .task-row b {
+        display: block;
+        color: #ffc56e;
+        font-size: 15px;
+        margin-bottom: 5px;
+      }
+
+      .task-row p {
+        margin: 0;
+        color: #fff4e4;
+        font-size: clamp(16px, 2.4vw, 19px);
+        line-height: 1.45;
+        font-weight: 760;
+      }
+
+      .discipline {
+        margin: clamp(32px, 5vw, 54px) auto 0;
+        color: #ffd46e;
+        font-size: clamp(34px, 7vw, 64px);
+        font-weight: 1000;
+        text-align: center;
+        text-shadow: 0 0 22px rgba(255, 119, 39, 0.68);
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        width: min(760px, 100%);
+        margin: 28px auto 0;
+      }
+
+      .primary-action,
+      .secondary-action {
+        min-height: 64px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 211, 117, 0.68);
+        color: #120805;
+        font-size: clamp(18px, 3vw, 26px);
+        font-weight: 1000;
+      }
+
+      .primary-action {
+        background: linear-gradient(180deg, #ffdf80, #b96918);
+        box-shadow: 0 0 24px rgba(255, 181, 51, 0.34);
+      }
+
+      .secondary-action {
+        color: #ffe09b;
+        background: rgba(0, 0, 0, 0.52);
+        box-shadow: inset 0 0 18px rgba(255, 200, 86, 0.08);
+      }
+
+      .promo-area {
+        width: min(1080px, calc(100% - 12px));
+        margin: clamp(44px, 6vw, 72px) auto 0;
+        display: grid;
+        gap: 18px;
+        filter: drop-shadow(0 0 18px rgba(255, 176, 44, 0.12));
+      }
+
+      .signalplus,
+      .donation {
+        position: relative;
+        border: 2px solid rgba(255, 222, 126, 0.95);
+        background:
+          radial-gradient(ellipse at 50% 102%, rgba(255, 226, 120, 0.32), transparent 18%),
+          linear-gradient(90deg, rgba(255, 207, 82, 0.12), transparent 10%, transparent 90%, rgba(255, 207, 82, 0.12)),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(0, 0, 0, 0.22) 46%, rgba(0, 0, 0, 0.72)),
+          #050403;
+        box-shadow:
+          inset 0 0 0 1px rgba(60, 22, 4, 0.92),
+          inset 0 0 0 8px rgba(255, 211, 98, 0.045),
+          inset 0 0 44px rgba(255, 177, 47, 0.08),
+          0 0 24px rgba(255, 184, 57, 0.16);
+        clip-path: polygon(24px 0, calc(100% - 24px) 0, 100% 24px, 100% calc(100% - 24px), calc(100% - 24px) 100%, 24px 100%, 0 calc(100% - 24px), 0 24px);
+      }
+
+      .signalplus::before,
+      .donation::before {
+        content: "";
+        position: absolute;
+        inset: 9px;
+        border: 1px solid rgba(255, 223, 128, 0.72);
+        clip-path: inherit;
+        pointer-events: none;
+        box-shadow:
+          inset 0 0 18px rgba(255, 201, 78, 0.08),
+          0 0 10px rgba(255, 201, 78, 0.1);
+      }
+
+      .signalplus::after,
+      .donation::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: -3px;
+        width: 78px;
+        height: 5px;
+        transform: translateX(-50%);
+        background: radial-gradient(ellipse, rgba(255, 246, 176, 0.95), rgba(255, 93, 31, 0.55) 48%, transparent 72%);
+        filter: blur(0.4px);
+        pointer-events: none;
+      }
+
+      .signalplus {
+        min-height: 128px;
+        display: grid;
+        grid-template-columns: 122px 1fr;
+        gap: 24px;
+        align-items: center;
+        padding: 22px clamp(30px, 5vw, 54px);
+        color: #ffe4a0;
+        text-decoration: none;
+      }
+
+      .sp-logo {
+        width: 86px;
+        height: 62px;
+        border-radius: 18px;
+        position: relative;
+        overflow: hidden;
+        background:
+          linear-gradient(135deg, #17bfff 0 46%, #0e8df6 46% 58%, #4be0bf 58% 100%);
+        box-shadow: 0 0 22px rgba(32, 200, 255, 0.45);
+        transform: skewX(-17deg);
+      }
+
+      .sp-logo::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, transparent 0 50%, rgba(255, 255, 255, 0.2) 50% 56%, transparent 56%);
+      }
+
+      .signalplus .promo-text {
+        color: #ffe09a;
+        font-size: clamp(36px, 6.6vw, 64px);
+        font-weight: 1000;
+        line-height: 1.1;
+        text-shadow:
+          0 2px 0 rgba(111, 56, 11, 0.92),
+          0 0 20px rgba(255, 204, 94, 0.72),
+          0 0 42px rgba(255, 117, 31, 0.24);
+      }
+
+      .donation {
+        min-height: 112px;
+        display: grid;
+        grid-template-columns: 96px 1fr;
+        gap: 22px;
+        align-items: center;
+        padding: 18px clamp(28px, 4vw, 46px);
+        border-color: rgba(190, 128, 35, 0.82);
+      }
+
+      .heart {
+        width: 66px;
+        height: 66px;
+        margin: auto;
+        display: grid;
+        place-items: center;
+        color: #050403;
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at 34% 26%, #fff4b7, transparent 18%),
+          linear-gradient(135deg, #f7d875, #a65d13);
+        font-size: 32px;
+        font-weight: 1000;
+        box-shadow:
+          inset 0 0 0 2px rgba(255, 244, 183, 0.32),
+          0 0 22px rgba(255, 186, 57, 0.36);
+      }
+
+      .donation strong {
+        display: block;
+        color: transparent;
+        background: linear-gradient(180deg, #fff0ad, #e6aa43 68%, #9b5712);
+        -webkit-background-clip: text;
+        background-clip: text;
+        font-size: clamp(26px, 4.6vw, 38px);
+        line-height: 1.1;
+        margin-bottom: 10px;
+        text-shadow: 0 0 16px rgba(255, 184, 57, 0.38);
+      }
+
+      .donation span {
+        display: block;
+        color: #eac06c;
+        font-size: clamp(13px, 2.7vw, 19px);
+        line-height: 1.35;
+        word-break: break-all;
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 22px;
+        transform: translateX(-50%) translateY(20px);
+        z-index: 10;
+        min-width: min(360px, calc(100% - 32px));
+        padding: 14px 18px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.86);
+        color: #ffe09c;
+        text-align: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      @media (max-width: 820px) {
+        .app {
+          padding-top: 34px;
+        }
+
+        .stage {
+          min-height: 520px;
+        }
+
+        .cards-grid {
+          grid-template-columns: 1fr;
+          width: min(430px, 100%);
+          margin: 0 auto;
+        }
+
+        .draw-card {
+          min-height: 0;
+          width: 100%;
+          aspect-ratio: 3 / 4.35;
+        }
+
+        .signalplus {
+          grid-template-columns: 78px 1fr;
+          min-height: 108px;
+        }
+
+        .sp-logo {
+          width: 64px;
+          height: 46px;
+        }
+      }
+
+      @media (max-width: 520px) {
+        .app {
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+
+        .tagline {
+          gap: 8px;
+        }
+
+        .stage {
+          padding-top: 30px;
+        }
+
+        .draw-card.task-card {
+          padding: 24px;
+        }
+
+        .task-title {
+          margin-top: 26px;
+        }
+
+        .task-row {
+          padding: 11px 12px;
+        }
+
+        .actions {
+          grid-template-columns: 1fr;
+        }
+
+        .signalplus,
+        .donation {
+          clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px);
+        }
+
+        .signalplus::before,
+        .donation::before {
+          inset: 6px;
+        }
+
+        .signalplus {
+          min-height: 92px;
+          grid-template-columns: 62px 1fr;
+          gap: 12px;
+          padding: 16px 18px;
+        }
+
+        .sp-logo {
+          width: 52px;
+          height: 38px;
+          border-radius: 10px;
+        }
+
+        .donation {
+          min-height: 94px;
+          grid-template-columns: 54px 1fr;
+          gap: 12px;
+          padding: 16px 18px;
+        }
+
+        .heart {
+          width: 44px;
+          height: 44px;
+          font-size: 22px;
+        }
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      .hero-lockup {
+        margin: 0 auto;
+        width: min(940px, 98vw);
+        line-height: 0;
+        text-align: center;
+      }
+
+      .title-lockup-img {
+        width: 100%;
+        height: auto;
+        display: block;
+        pointer-events: none;
+        user-select: none;
+        filter: drop-shadow(0 0 16px rgba(255, 197, 66, 0.28));
+      }
+
+      .promo-area {
+        width: min(940px, calc(100% - 12px));
+        gap: 16px;
+      }
+
+      .signalplus,
+      .donation {
+        min-height: 0;
+        display: block;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+        clip-path: none;
+        line-height: 0;
+      }
+
+      .signalplus::before,
+      .signalplus::after,
+      .donation::before,
+      .donation::after {
+        content: none;
+      }
+
+      .promo-banner {
+        width: 100%;
+        height: auto;
+        display: block;
+        pointer-events: none;
+        user-select: none;
+      }
+
+      .donation {
+        width: 99.4%;
+        margin: 0 auto;
+        cursor: pointer;
+      }
+
+      .donation:focus-visible {
+        outline: 2px solid rgba(255, 224, 140, 0.9);
+        outline-offset: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app" id="app">
+      <h1 class="hero-lockup">
+        <span class="sr-only">期权盲盒，不装大师，只卖心跳</span>
+        <img class="title-lockup-img" src="./assets/title-lockup-cutout.png" alt="" aria-hidden="true" draggable="false" />
+      </h1>
+
+      <section class="stage" aria-live="polite">
+        <button class="box-scene" id="boxButton" type="button" aria-label="打开期权盲盒">
+          <span class="spark"></span>
+          <span class="spark"></span>
+          <span class="spark"></span>
+          <span class="spark"></span>
+          <img class="hero-box-img" src="./assets/blind-box-cutout.png" alt="期权盲盒" draggable="false" />
+          <img class="card-back one" src="./assets/card-back-cutout.png" alt="" aria-hidden="true" draggable="false" />
+          <img class="card-back two" src="./assets/card-back-cutout.png" alt="" aria-hidden="true" draggable="false" />
+        </button>
+
+        <section class="cards-view" id="cardsView" aria-label="抽卡结果">
+          <div class="cards-grid">
+            <article class="draw-card coin-card" id="coinCard">
+              <span class="card-label">COIN CARD</span>
+              <div>
+                <div class="coin-logo" id="coinLogo"></div>
+                <p class="coin-symbol" id="coinSymbol">BTC</p>
+              </div>
+            </article>
+
+            <article class="draw-card task-card">
+              <span class="card-label">TASK CARD</span>
+              <h2 class="task-title" id="taskTitle">IV 做空卡</h2>
+              <div class="task-rows">
+                <div class="task-row">
+                  <b>指令</b>
+                  <p id="taskInstruction">用铁鹰、铁蝶或带保护腿的双卖策略做空波动率。</p>
+                </div>
+                <div class="task-row">
+                  <b>目标</b>
+                  <p id="taskGoal">赌币价别乱跑，权利金回落。</p>
+                </div>
+                <div class="task-row">
+                  <b>失败</b>
+                  <p id="taskFailure">币价单边暴走，或波动率继续上升。</p>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <p class="discipline">游戏，别上头</p>
+
+          <div class="actions">
+            <button class="primary-action" id="redrawButton" type="button">重新抽盲盒</button>
+            <button class="secondary-action" id="shareButton" type="button">分享朋友圈</button>
+          </div>
+        </section>
+      </section>
+
+      <section class="promo-area" aria-label="推广和打赏">
+        <a class="signalplus" href="https://t.signalplus.com/user/register?ref=JbCMzI" target="_blank" rel="noopener noreferrer" aria-label="在 SignalPlus 交易期权">
+          <img class="promo-banner" src="./assets/signalplus-banner-cutout.png" alt="" aria-hidden="true" draggable="false" />
+        </a>
+        <button class="donation" id="donationButton" type="button" aria-label="复制冰火岛社区打赏钱包地址">
+          <img class="promo-banner" src="./assets/donation-banner-cutout.png" alt="" aria-hidden="true" draggable="false" />
+        </button>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script>
+      const coins = [
+        { symbol: "BTC", color: "#f7931a", logo: "btc" },
+        { symbol: "ETH", color: "#8fa7ff", logo: "eth" },
+        { symbol: "SOL", color: "#8d5cff", logo: "sol" },
+        { symbol: "HYPE", color: "#5df0ba", logo: "hype" },
+        { symbol: "XRP", color: "#e8eef6", logo: "xrp" },
+        { symbol: "AVAX", color: "#e84142", logo: "avax" },
+        { symbol: "TRX", color: "#ff3b3b", logo: "trx" },
+      ];
+
+      const cards = [
+        ["Call 彩票卡", "买入一张看涨期权。", "赌币价快速上涨。", "币价不涨、涨太慢，或时间价值被吃掉。"],
+        ["Put 黑天鹅卡", "买入一张看跌期权。", "赌币价突然下跌。", "币价横盘、反弹，或跌得不够快。"],
+        ["宽跨式烟花卡", "同时买入一个 Call 和一个 Put。", "赌币价大幅波动。", "币价太安静，权利金慢慢融化。"],
+        ["IV 做空卡", "用铁鹰、铁蝶或带保护腿的双卖策略做空波动率。", "赌币价别乱跑，权利金回落。", "币价单边暴走，或波动率继续上升。"],
+        ["IV 做多卡", "用跨式或宽跨式做多波动率。", "赌市场突然变紧张。", "币价不动，波动率也不涨。"],
+        ["牛市认购价差卡", "买入低行权价 Call，卖出高行权价 Call。", "赌币价温和上涨。", "币价不上涨，或涨不到目标区间。"],
+        ["熊市认沽价差卡", "买入高行权价 Put，卖出低行权价 Put。", "赌币价温和下跌。", "币价不跌，或跌得不够深。"],
+        ["牛市认沽价差卡", "卖出较高行权价 Put，买入较低行权价 Put。", "赌币价不跌破关键区域。", "币价快速跌穿防线。"],
+        ["熊市认购价差卡", "卖出较低行权价 Call，买入较高行权价 Call。", "赌币价涨不上去。", "币价突然拉升突破上方。"],
+        ["铁鹰结界卡", "开一个铁鹰策略。", "赌币价保持在中间区间。", "币价大涨或大跌，冲破结界。"],
+        ["铁蝶压缩卡", "开一个铁蝶策略。", "赌币价贴近中间价位。", "币价偏离中心太远。"],
+        ["保护 Put 卡", "如果你有现货，买入一张 Put 做保护。", "给现货仓位买保险。", "币价不跌，保险费白花。"],
+        ["备兑 Call 卡", "如果你有现货，卖出一张 Call。", "用上涨空间换取权利金。", "币价暴涨，现货被卖飞。"],
+        ["领口 Collar 卡", "持有现货，同时买 Put、卖 Call。", "限制下跌风险。", "币价暴涨时，上方收益被封顶。"],
+        ["Theta 惩罚卡", "买入一张短期期权。", "亲自体验时间衰减。", "币价没动，权利金却变少。"],
+        ["Gamma 暴走卡", "买入一张较短期期权。", "赌币价快速移动带来放大收益。", "币价不动，Theta 反过来惩罚你。"],
+        ["Vega 情绪卡", "买入一笔对波动率敏感的期权策略。", "赌市场情绪升温。", "方向对了，但波动率回落。"],
+        ["Delta 冲锋卡", "买入一张 Delta 较高的期权。", "更直接地跟随币价方向。", "判断方向错，亏损也更直接。"],
+        ["末日彩票卡", "用极小仓位买入深虚值期权。", "赌极端行情。", "极端行情没来，门票归零。"],
+        ["平值心跳卡", "买入接近平值的 Call 或 Put。", "赌币价马上启动。", "币价横盘，平值期权快速耗损。"],
+        ["远期冷静卡", "买入更远到期的期权。", "降低短期时间衰减压力。", "方向错了，贵门票也救不了你。"],
+        ["24 小时勇者卡", "开一笔期权仓位，最多持有 24 小时。", "训练快速决策和执行。", "到点不走，游戏变成执念。"],
+        ["翻倍就跑卡", "盈利达到 100% 就止盈。", "练习见好就收。", "贪心不走，利润回吐。"],
+        ["半血认输卡", "亏损达到 50% 就退出。", "练习主动认输。", "不认输，把小亏拖成大亏。"],
+        ["禁止加仓卡", "本次交易只允许下一次单。", "防止情绪化补仓。", "手痒加仓，游戏规则失效。"],
+        ["禁止复仇卡", "如果你正面临亏损，今天停止交易。", "切断复仇交易。", "亏了还想赢回来。"],
+        ["最小仓位卡", "只用平台允许的最小仓位交易。", "找手感，不追求结果。", "忍不住放大仓位。"],
+        ["跳过权卡", "看不懂本轮任务就跳过。", "让“不交易”也成为选择。", "硬做自己不懂的策略。"],
+        ["复盘狂魔卡", "开仓前写理由，平仓后写结果。", "比较预期和现实。", "只看盈亏，不总结原因。"],
+        ["单腿纯粹卡", "只能买一个 Call 或一个 Put。", "把方向观点说清楚。", "方向错，单腿直接挨打。"],
+        ["双腿克制卡", "必须用价差表达方向观点。", "降低成本，控制最大亏损。", "币价没走到目标区间。"],
+        ["四腿结界卡", "必须使用铁鹰或铁蝶。", "体验组合策略的区间玩法。", "币价脱离区间。"],
+        ["山寨心跳卡", "如果抽到 SOL/HYPE/XRP/AVAX/TRX，仓位减半。", "保留刺激，降低伤害。", "把山寨币当 BTC/ETH 一样重仓玩。"],
+        ["BTC 老大哥卡", "如果抽到 BTC，只能做 Call、Put 或价差。", "用最主流币种练基本功。", "策略太复杂，反而看不清方向。"],
+        ["ETH 法师卡", "如果抽到 ETH，优先做价差、跨式或铁鹰。", "用组合表达更细的观点。", "组合太花，自己都说不清逻辑。"],
+        ["关灯睡觉卡", "今天不交易，只写一条明天的交易规则。", "把空仓也当成一次执行。", "明明抽到不交易，还忍不住下单。"],
+      ].map(([name, instruction, goal, failure]) => ({ name, instruction, goal, failure }));
+
+      const app = document.querySelector("#app");
+      const boxButton = document.querySelector("#boxButton");
+      const redrawButton = document.querySelector("#redrawButton");
+      const shareButton = document.querySelector("#shareButton");
+      const donationButton = document.querySelector("#donationButton");
+      const coinCard = document.querySelector("#coinCard");
+      const coinLogo = document.querySelector("#coinLogo");
+      const coinSymbol = document.querySelector("#coinSymbol");
+      const taskTitle = document.querySelector("#taskTitle");
+      const taskInstruction = document.querySelector("#taskInstruction");
+      const taskGoal = document.querySelector("#taskGoal");
+      const taskFailure = document.querySelector("#taskFailure");
+      const toast = document.querySelector("#toast");
+      const donationWallet = "0x29f091DAA3dfee8100645ee24239bCC3ae174B42";
+
+      let currentDraw = null;
+
+      function randomItem(list) {
+        const buffer = new Uint32Array(1);
+        crypto.getRandomValues(buffer);
+        return list[buffer[0] % list.length];
+      }
+
+      function logoSvg(coin) {
+        const color = coin.color;
+        const common = `filter="drop-shadow(0 0 12px ${color}88)"`;
+        if (coin.logo === "btc") {
+          return `<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47" fill="${color}"/><text x="50" y="67" text-anchor="middle" font-size="58" font-weight="900" fill="#fff" font-family="Arial">₿</text></svg>`;
+        }
+        if (coin.logo === "eth") {
+          return `<svg viewBox="0 0 100 100" ${common} aria-hidden="true"><polygon points="50,6 20,53 50,39 80,53" fill="#d8e1ff"/><polygon points="50,6 50,39 80,53" fill="${color}"/><polygon points="20,60 50,94 50,68" fill="#b8c4ff"/><polygon points="80,60 50,94 50,68" fill="#627eea"/></svg>`;
+        }
+        if (coin.logo === "sol") {
+          return `<svg viewBox="0 0 100 100" ${common} aria-hidden="true"><rect x="18" y="22" width="64" height="15" rx="5" fill="url(#solg)"/><rect x="18" y="43" width="64" height="15" rx="5" fill="url(#solg)" transform="skewX(-14)"/><rect x="18" y="64" width="64" height="15" rx="5" fill="url(#solg)"/><defs><linearGradient id="solg" x1="0" x2="1"><stop stop-color="#14f195"/><stop offset=".5" stop-color="#80ecff"/><stop offset="1" stop-color="#9945ff"/></linearGradient></defs></svg>`;
+        }
+        if (coin.logo === "hype") {
+          return `<img src="./assets/hyperliquid-logo-cutout.png" alt="" aria-hidden="true" draggable="false" />`;
+        }
+        if (coin.logo === "xrp") {
+          return `<svg viewBox="0 0 100 100" ${common} aria-hidden="true"><circle cx="50" cy="50" r="44" fill="#101318" stroke="${color}" stroke-width="5"/><path d="M25 31h12c7 0 10 5 13 9 3-4 6-9 13-9h12L58 49c-5 5-11 5-16 0L25 31zm0 38h12c7 0 10-5 13-9 3 4 6 9 13 9h12L58 51c-5-5-11-5-16 0L25 69z" fill="${color}"/></svg>`;
+        }
+        if (coin.logo === "avax") {
+          return `<svg viewBox="0 0 100 100" ${common} aria-hidden="true"><circle cx="50" cy="50" r="45" fill="${color}"/><path d="M50 20 79 72H60L50 54 40 72H21L50 20z" fill="#fff"/><path d="M62 72h18l-9-16-9 16z" fill="#fff"/></svg>`;
+        }
+        return `<svg viewBox="0 0 100 100" ${common} aria-hidden="true"><circle cx="50" cy="50" r="45" fill="${color}"/><path d="M24 20 80 32 48 84 24 20zm10 11 14 36 21-29-35-7zm6 2 29 7-18 8-11-15zm12 18-5 18 17-28-12 10z" fill="#fff"/></svg>`;
+      }
+
+      function renderDraw(coin, card) {
+        currentDraw = { coin, card };
+        coinCard.style.setProperty("--accent", coin.color);
+        coinCard.style.setProperty("--glow", `${coin.color}55`);
+        coinLogo.innerHTML = logoSvg(coin);
+        coinSymbol.textContent = coin.symbol;
+        coinSymbol.style.color = coin.color;
+        taskTitle.textContent = card.name;
+        taskInstruction.textContent = card.instruction;
+        taskGoal.textContent = card.goal;
+        taskFailure.textContent = card.failure;
+      }
+
+      function openBox() {
+        boxButton.classList.add("opening");
+        window.setTimeout(() => {
+          renderDraw(randomItem(coins), randomItem(cards));
+          app.classList.add("has-result");
+          boxButton.classList.remove("opening");
+          document.querySelector("#cardsView").scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 920);
+      }
+
+      function redraw() {
+        app.classList.remove("has-result");
+        window.setTimeout(openBox, 120);
+      }
+
+      async function shareResult() {
+        if (!currentDraw) return;
+        const text = `我今天抽到：${currentDraw.coin.symbol} + ${currentDraw.card.name}\\n期权盲盒，不装大师，只卖心跳。\\n游戏，别上头。`;
+        try {
+          if (navigator.share) {
+            await navigator.share({ title: "期权盲盒", text });
+            return;
+          }
+          await navigator.clipboard.writeText(text);
+          showToast("分享文案已复制，可以发朋友圈");
+        } catch (error) {
+          showToast("可以截图分享这一页");
+        }
+      }
+
+      async function copyDonationWallet() {
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(donationWallet);
+          } else {
+            copyTextFallback(donationWallet);
+          }
+          showToast("钱包地址已复制");
+        } catch (error) {
+          try {
+            copyTextFallback(donationWallet);
+            showToast("钱包地址已复制");
+          } catch (fallbackError) {
+            showToast(`钱包地址：${donationWallet}`);
+          }
+        }
+      }
+
+      function copyTextFallback(text) {
+        const input = document.createElement("textarea");
+        input.value = text;
+        input.setAttribute("readonly", "");
+        input.style.position = "fixed";
+        input.style.left = "-9999px";
+        input.style.top = "0";
+        document.body.appendChild(input);
+        input.focus();
+        input.select();
+        const copied = document.execCommand("copy");
+        document.body.removeChild(input);
+        if (!copied) {
+          throw new Error("copy failed");
+        }
+      }
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add("show");
+        window.setTimeout(() => toast.classList.remove("show"), 2200);
+      }
+
+      boxButton.addEventListener("click", openBox);
+      redrawButton.addEventListener("click", redraw);
+      shareButton.addEventListener("click", shareResult);
+      donationButton.addEventListener("click", copyDonationWallet);
+      renderDraw(coins[0], cards[3]);
+    </script>
+  </body>
+</html>
